@@ -1,0 +1,290 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Jun  6 15:34:42 2023
+
+@author: kerhnewek
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+import statistics
+from sklearn.metrics import r2_score
+from Data import *
+
+plt.close('all')
+def lineal(x,a,b): return x*a+b
+def C1(t,conc0,t12): return conc0*np.exp(t12*t)
+
+#Datos
+#Temperatura
+T=30.0
+file='TEV_290623_2.xlsx'
+#Buffer Columanas
+Cob=["A11","B11","C11"]
+A1,std1=Get_data(file,Cob[0],Cob[1],Cob[2])
+Cob2=["A12","B12","C12"]
+A2,std2=Get_data(file,Cob2[0],Cob2[1],Cob2[2])
+# # Cob3=["I17","J17","K17"]
+# # A3,std3=Get_data(file,Cob3[0],Cob3[1],Cob3[2])
+
+
+
+# #Control(+)
+# Cop=["A20","B20","C20"]
+# A2,std2=Get_data("TEV_120623_3.xlsx",Cop[0],Cop[1],Cop[2])
+
+# Cop2=["B22","B22","B22"]
+# A5,std5=Get_data("TEV_120623_3.xlsx",Cop2[0],Cop2[1],Cop2[2])
+
+# # Cop3=["J7","K7","L7"]
+# # A8,std8=Get_data("TEV_120623_3.xlsx",Cop3[0],Cop3[1],Cop3[2])
+
+# # Cop4=["J9","K9","L9"]
+# # A3,std3=Get_data("TEV_120623_3.xlsx",Cop4[0],Cop4[1],Cop4[2])
+
+
+# #Ensayos
+Coe=["A17","B17","C17"]
+A4,std4=Get_data(file,Coe[0],Coe[1],Coe[2])
+# Coe1=["I19","J19","K19"]
+# A5,std5=Get_data(file,Coe1[0],Coe1[1],Coe1[2])
+
+# Coe2=["I21","J21","K21"]
+# A7,std7=Get_data(file,Coe2[0],Coe2[1],Coe2[2])
+# Coe3=["I22","J22","K23"]
+# A6,std6=Get_data(file,Coe3[0],Coe3[1],Coe3[2])
+
+t=np.linspace(0,3596,117)
+
+# #FAMQXL520
+k2=plt.figure("Fluorescencia")
+plt.errorbar(t,A1, yerr=std1,fmt='r*', label='Buffer')
+# plt.errorbar(t,A12, yerr=std12,fmt= 'g*', label=r'Buffer 2 (-)')
+# plt.errorbar(t,A13, yerr=std13,fmt= 'b*', label=r'Buffer 3 (-)')
+plt.errorbar(t,A2, yerr=std2,fmt= 'g*', label=r'Flow (1400 $\mu g/mL$)')
+# plt.errorbar(t,A5, yerr=std5,fmt='b*', label=r'TEV 4 $\mu g/mL$ ')
+# plt.errorbar(t,A6, yerr=std6,fmt='b*', label='TEV 4 $\mu g/mL$ ')
+plt.errorbar(t,A4, yerr=std4,fmt='b*', label='Eluato (300 $\mu g/mL$)')
+# plt.errorbar(t,A7, yerr=std7,fmt='g*', label='TEV 4 $\mu g/mL$ (kit)')
+plt.xlabel(r'$ t/s $')
+plt.ylabel(r"$Fluorescencia/UA$")
+plt.legend(loc='best')
+
+# #PR
+# # k2=plt.figure("Fluorescencia")
+# # plt.errorbar(t,A1, yerr=std1,fmt='r*', label='Buffer (-)')
+# # plt.errorbar(t,A12, yerr=std12,fmt= 'g*', label=r'Buffer 2 (-)')
+# # plt.errorbar(t,A13, yerr=std13,fmt= 'b*', label=r'Buffer 3 (-)')
+# # plt.errorbar(t,A2, yerr=std2,fmt= 'g*', label=r'TEV 4 $\mu g/mL$(Buffer 2)')
+# # plt.errorbar(t,A5, yerr=std5,fmt='b*', label=r'TEV 4 $\mu g/mL$(Buffer 3)')
+# # # plt.errorbar(t,A6, yerr=std6,fmt='b*', label='Lisado')
+# # # plt.errorbar(t,A4, yerr=std4,fmt='k*', label='TEV-FKBP (precipitado)')
+# # # plt.errorbar(t,A7, yerr=std7,fmt='k*', label='TEV-FKBP (precipitado)')
+# # plt.xlabel(r'$ t/s $')
+# # plt.ylabel(r"$Fluorescencia/UA$")
+# # plt.legend(loc='best')
+
+
+
+# #Calibracion FAM
+
+file="TEV_280623.xlsx"
+
+t2=np.linspace(0,3596,117)
+#0nM
+C1,stdc1=Get_data(file,"E1","F1","G1")
+C1=NewData(C1,0)
+stdc1=NewData(stdc1,0)
+#1nM
+C2,stdc2=Get_data(file,"E2","F2","G2")
+C2=NewData(C2,0)
+stdc2=NewData(stdc2,0)
+# #5nM
+C3,stdc3=Get_data(file,"E3","F3","G3")
+C3=NewData(C3,0)
+stdc3=NewData(stdc3,0)
+# #10mM
+C4,stdc4=Get_data(file,"E4","F4","G4")
+C4=NewData(C4,0)
+stdc4=NewData(stdc4,0)
+# #12.5nM
+C5,stdc5=Get_data(file,"E5","F5","G5")
+C5=NewData(C5,0)
+stdc5=NewData(stdc5,0)
+# #25nM
+C6,stdc6=Get_data(file,"E6","F6","G6")
+C6=NewData(C6,0)
+stdc6=NewData(stdc6,0)
+# #50nM
+C7,stdc7=Get_data(file,"E7","F7","G7")
+C7=NewData(C7,0)
+stdc7=NewData(stdc7,0)
+# #75nM
+C8,stdc8=Get_data(file,"E8","F8","G8")
+C8=NewData(C8,0)
+stdc8=NewData(stdc8,0)
+# #100nM
+C9,stdc9=Get_data(file,"E9","F9","G9")
+C9=NewData(C9,0)
+stdc9=NewData(stdc9,0)
+#125mM
+# C10,stdc10=Get_data(file,"E10","F10","G10")
+# C10=NewData(C10,0)
+# stdc10=NewData(stdc10,0)
+
+
+plt.figure("Calibracion")
+plt.errorbar(t2,C1, yerr=stdc1,fmt='r*', label='FAM 0 nM')
+plt.errorbar(t2,C2, yerr=stdc2,fmt= 'g*', label='FAM 1 nM')
+plt.errorbar(t2,C3, yerr=stdc3,fmt='b*', label='FAM 5 nM')
+plt.errorbar(t2,C4, yerr=stdc4,fmt='k*', label="FAM 10 nM")
+plt.errorbar(t2,C5, yerr=stdc5,fmt='y*', label="FAM 12.5 nM")
+plt.errorbar(t2,C6, yerr=stdc6,fmt='c*', label="FAM 25 nM")
+plt.errorbar(t2,C7, yerr=stdc7,fmt='m*', label="FAM 50 nM")
+plt.errorbar(t2,C8, yerr=stdc8,fmt='k*', label="FAM 75 nM")
+plt.errorbar(t2,C9, yerr=stdc8,fmt='k*', label="FAM 100 nM")
+# plt.errorbar(t2,C10, yerr=stdc10,fmt='k*', label="FAM 125 nM")
+plt.xlabel(r'$ t/s $')
+plt.ylabel(r"$Fluorescencia/UA$")
+plt.legend(loc='best')
+
+# #Curva de calibracion FAM
+
+Data=np.array([C1,C2,C3,C4,C5,C6,C7,C8,C9])
+std_Data=np.array([stdc1,stdc2,stdc3,stdc4,stdc5,stdc6,stdc7,stdc8,stdc9])
+conc=np.array([0,1,5,10,12.5,25,50,75,100])
+means=np.array([statistics.mean(Data[i]) for i in range(0,len(Data)) ])
+means_std=np.array([statistics.mean(std_Data[i]) for i in range(0,len(Data)) ])
+
+p, p2 =_=curve_fit(lineal,conc,means)
+s=np.array(abs(((np.sqrt(np.diag(p2))/1)))).tolist()
+dercalc=lineal(conc,p[0],p[1])
+rsqr=np.sqrt(r2_score(means,dercalc))
+u_rel=(s[0]/p[0])*100
+u_rel2=(s[1]/p[1])*100
+
+
+
+k2=plt.figure("Calibracion 2")
+plt.errorbar(conc,means, yerr=means_std,fmt='k*')
+plt.plot(conc,lineal(conc,p[0],p[1]), "r")
+# plt.annotate(r'$ T= {} °C$'.format(round(T,3)),
+#                         xy=(1, 0), xycoords='axes fraction',
+#                         xytext=(-360, 340), textcoords='offset pixels',
+#                         horizontalalignment='right',           
+#                     verticalalignment='bottom') 
+# plt.annotate(r'$m= {}   (u_r ={} \%)$'.format(round(p[0],3), round(u_rel,2)),
+#                         xy=(1, 0), xycoords='axes fraction',
+#                         xytext=(-250, 320), textcoords='offset pixels',
+#                         horizontalalignment='right',           
+#                     verticalalignment='bottom')  
+# plt.annotate(r'$b= {}   (u_r ={} \%) $'.format(round(p[1],3),round(u_rel2,2)),
+#                         xy=(1, 0), xycoords='axes fraction',
+#                         xytext=(-235, 300), textcoords='offset pixels',
+#                         horizontalalignment='right',           
+#                     verticalalignment='bottom') 
+# plt.annotate(r'$r= {} $'.format(round(rsqr,4)),
+#                         xy=(1, 0), xycoords='axes fraction',
+#                         xytext=(-350, 280), textcoords='offset pixels',
+#                         horizontalalignment='right',           
+#                     verticalalignment='bottom')
+plt.ylabel(r'$ Fluorescencia/UA $')
+plt.xlabel(r"$C/nM$")
+
+
+#Conversion de UA a uM de FAM
+
+
+A4,std4=CF_C(A4,std4,p[0],p[1])
+
+A1,std1=CF_C(A1,std1,p[0],p[1])
+A2,std2=CF_C(A2,std2,p[0],p[1])
+
+# # std8f=(std8/A8)
+# # A8=FAMconc(A8,p[0],p[1])
+# # std8=2*std8f*A8
+
+# # std3f=(std3/A3)
+# # A3=FAMconc(A3,p[0],p[1])
+# # std3=2*std3f*A3
+
+
+# #Graficas
+# #Regresion para obtener las pendientes a t----> 0
+
+# a,b,c=Opt_lineal(t,A4)
+a1,b1,c1=Opt_lineal(t,A4)
+
+
+plt.figure("Fluorescencia FAM")
+plt.errorbar(t,A4, yerr=std4,fmt='kP', label=r'FKBP-TEV (300 $\mu$g/mL)')
+# plt.plot(t,lineal(t,a,b),'r')
+plt.errorbar(t,A1, yerr=std1,fmt= 'ko', label=r'Buffer (-)')
+plt.plot(np.array([0,1000]),lineal(np.array([0,1000]),a1[0],a1[1]),'--')
+# plt.errorbar(t,A8, yerr=std8,fmt= 'y*', label=r'TEV 1 $\mu g/mL$')
+# plt.errorbar(t,A2, yerr=std2,fmt='y*', label='Flow')
+# plt.errorbar(t,A4, yerr=std4,fmt='k*', label='TEV-FKBP (precipitado)')
+# plt.errorbar(t,A7, yerr=std7,fmt='k*', label='TEV-FKBP (precipitado)')
+# plt.annotate(r'$ T= {} °C$'.format(round(T,3)),
+#                         xy=(1, 0), xycoords='axes fraction',
+#                         xytext=(-400, 340), textcoords='offset pixels',
+#                         horizontalalignment='right',           
+#                     verticalalignment='bottom') 
+# plt.annotate(r'$m= {}   (u_r ={} \%)$'.format(round(a1[0],4), round(100*b1[0]/a1[0],2)),
+#                         xy=(1, 0), xycoords='axes fraction',
+#                         xytext=(-100, 150), textcoords='offset pixels',
+#                         horizontalalignment='right',           
+#                     verticalalignment='bottom')  
+# plt.annotate(r'$b= {}   (u_r ={} \%) $'.format(round(a1[1],4),round(100*b1[1]/a1[1],2)),
+#                         xy=(1, 0), xycoords='axes fraction',
+#                         xytext=(-100, 120), textcoords='offset pixels',
+#                         horizontalalignment='right',           
+#                     verticalalignment='bottom') 
+# plt.annotate(r'$r= {} $'.format(round(c1,4)),
+#                         xy=(1, 0), xycoords='axes fraction',
+#                         xytext=(-100, 100), textcoords='offset pixels',
+#                         horizontalalignment='right',           
+#                     verticalalignment='bottom')
+plt.xlabel(r'$ t/s $')
+plt.ylabel(r"[FAM]/ $\mu M$")
+plt.legend(loc='best')
+
+
+
+
+# # #Control positivo
+# # p1=dyf(t,A2)
+# p2=dyf(t,A5)
+# # # p3=dyf(t,A8)
+# # # #Lisado
+# # # p4=dyf(t,A3)
+# # # p5=dyf(t,A6)
+# # # #Precipitado
+p6=dyf(t,A4)
+# p7=dyf(t,A7)
+
+
+# m_A5,stdA5=Mean_Slope(p6,20)
+# print(m_A5,stdA5)
+
+plt.figure("Pendientes")
+# plt.plot(t,p2, 'b*', label='TEV')
+# plt.plot(t,p2, 'b*', label='TEV')
+# plt.plot(t,p3, 'r*', label='TEV')
+# plt.plot(t,p4, 'g*', label='Lisado')
+# plt.plot(t,p5, 'g*', label='Lisado')
+plt.plot(t,p6, 'k*',label=r'FKBP-TEV (300 $\mu$g/mL)')
+# plt.plot(t,p7, 'b*', label='Precipitado')
+# plt.xlabel(r'$ t/s $')
+# plt.annotate(r'$d[FAM]/dt= {}   (u_r ={} \%)$'.format(round(m_A5,4), round(100*stdA5/m_A5,2)),
+#                         xy=(1, 0), xycoords='axes fraction',
+#                         xytext=(-250, 340), textcoords='offset pixels',
+#                         horizontalalignment='right',           
+#                     verticalalignment='bottom')  
+plt.ylabel(r'$ \left(\dfrac{d[FAM]}{dt} \right) /Ms^{-1} $')
+plt.xlabel(r'$ t/s $')
+plt.legend(loc='best')
+
+
